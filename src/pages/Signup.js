@@ -3,8 +3,11 @@ import { Text, Input, Button, Image } from '../elements'
 import styled from 'styled-components'
 
 const Signup = () => {
+  // 버튼 위에 마우스가 올려져 있을 때 색 변경을 관리하는 state
   const [emailButtonColor, setEmailButtonColor] = useState('white')
   const [signupButtonColor, setSignupButtonColor] = useState('#35c4ef')
+
+  // 회원가입에 필요한 기본적인 계정 정보 관리하는 state
   const [form, setForm] = useState({
     email: '',
     emailSuffix: '',
@@ -13,6 +16,7 @@ const Signup = () => {
     nickname: '',
   })
 
+  // 형식에 맞지 않을 때 글씨를 빨간색으로 바꿔줄 state
   const [textColor, setTextColor] = useState({
     email: 'black',
     password: 'black',
@@ -20,13 +24,14 @@ const Signup = () => {
     nickname: 'black',
   })
 
+  // 형식에 맞는지 여부를 알려주는 text를 관리하는 state
   const [emailCheckMsg, setEmailCheckMsg] = useState('')
   const [passwordCheckMsg, setPasswordCheckMsg] = useState('')
   const [passwordRightMsg, setPasswordRightMsg] = useState('')
   const [nicknameCheckMsg, setNicknameCheckMsg] = useState('')
 
+  // form값을 불러오고 바뀐 값만 form에 새로 대체해줌
   const handleChange = (e) => {
-    //form값을 불러오고 바뀐 값만 form에 새로 대체해줌
     const changed = {
       ...form,
       [e.target.name]: e.target.value,
@@ -35,13 +40,14 @@ const Signup = () => {
     setForm(changed)
   }
 
+  // 이메일 형식 체크 정규식
   const emailRegExp = (str) => {
-    // 이메일 형식 체크 정규식
     str = str + '@' + form.emailSuffix
     var regExp = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i
     return regExp.test(str) ? true : false
   }
 
+  // 이메일 형식 체크 함수
   const emailCheckFunc = () => {
     if (emailRegExp(form.email) || form.email.length === 0) {
       setEmailCheckMsg('')
@@ -52,17 +58,18 @@ const Signup = () => {
     }
   }
 
+  // 비밀번호와 비밀번호 확인이 일치하거나, 비밀번호 확인 칸이 비어있는 경우 true 반환
   const pEqualR = () => {
-    //비밀번호와 비밀번호 확인이 일치하거나, 비밀번호 확인 칸이 비어있는 경우 true 반환
     return form.password === form.repassword || form.repassword.length === 0
   }
 
+  // 영문, 숫자를 포함한 8자 이상의 비밀번호 형식 체크 정규식 (정의된 특수문자도 사용 가능)
   const passwordRegExp = (str) => {
-    //영문, 숫자를 포함한 8자 이상의 비밀번호 형식 체크 정규식 (정의된 특수문자도 사용 가능)
     var regExp = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d~!@#$%^&*()-_+|=]{8,}$/
     return regExp.test(str) ? true : false
   }
 
+  // 비밀번호 형식 체크 함수
   const passwordCheckFunc = () => {
     if (passwordRegExp(form.password) || form.password.length === 0) {
       setPasswordCheckMsg('')
@@ -75,12 +82,13 @@ const Signup = () => {
     }
   }
 
+  // 2자 이상 15자 이하의 영문, 숫자, 한글로 이루어진 닉네임 형식 체크 정규식
   const nicknameRegExp = (str) => {
-    //2자 이상 15자 이하의 영문, 숫자, 한글로 이루어진 닉네임 형식 체크 정규식
     var regExp = /^([a-zA-Z0-9ㄱ-ㅎ|ㅏ-ㅣ|가-힣]).{1,14}$/
     return regExp.test(str) ? true : false
   }
 
+  // 닉네임 형식 체크 함수
   const nicknameCheckFunc = () => {
     if (nicknameRegExp(form.nickname) || form.nickname.length === 0) {
       setNicknameCheckMsg('')
@@ -95,15 +103,17 @@ const Signup = () => {
   }
 
   useEffect(() => {
+    // 이메일 값이 바뀔 때마다 이메일이 형식에 맞는지 확인
     emailCheckFunc()
   }, [form.email, form.emailSuffix])
 
   useEffect(() => {
+    // 비밀번호 값이 바뀔 때마다 비밀번호가 형식에 맞는지 확인
     passwordCheckFunc()
   }, [form.password])
 
   useEffect(() => {
-    //비밀번호 확인 칸의 값이 변화할 때마다 비밀번호가 일치하는지 여부를 알려줌
+    // 비밀번호 확인 칸의 값이 바뀔 때마다 비밀번호가 일치하는지 확인
     if (pEqualR()) {
       setPasswordRightMsg('')
       setTextColor({ repassword: 'black' })
@@ -114,6 +124,7 @@ const Signup = () => {
   }, [form.repassword])
 
   useEffect(() => {
+    // 닉네임 값이 바뀔 때마다 닉네임이 형식에 맞는지 확인
     nicknameCheckFunc()
   }, [form.nickname])
 
