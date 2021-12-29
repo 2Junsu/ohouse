@@ -1,6 +1,7 @@
 import React, { Fragment, useState, useEffect } from 'react'
 import { Text, Input, Button, Image } from '../elements'
 import styled from 'styled-components'
+import $ from 'jquery'
 
 const Signup = () => {
   // 버튼 위에 마우스가 올려져 있을 때 색 변경을 관리하는 state
@@ -30,6 +31,8 @@ const Signup = () => {
   const [passwordRightMsg, setPasswordRightMsg] = useState('')
   const [nicknameCheckMsg, setNicknameCheckMsg] = useState('')
 
+  const [emailCheck, setEmailCheck] = useState('') // 이메일 중복 확인 완료 상태 임시 저장
+
   // form값을 불러오고 바뀐 값만 form에 새로 대체해줌
   const handleChange = (e) => {
     const changed = {
@@ -56,6 +59,21 @@ const Signup = () => {
       setEmailCheckMsg('이메일 형식이 올바르지 않습니다.')
       setTextColor({ email: 'red' })
     }
+    setEmailCheck('') // emailCheckFunc이 실행될 때마다(email 값이 바뀔 때마다) ''로 초기화
+  }
+
+  const testEmailCertification = (str) => {
+    // 이메일 인증하기 버튼 눌렀을 때 인증 실패하면 메시지 띄우면 됨(이메일 형식 예외 케이스 굳이 안 짜도 됨)
+    // 이메일이 가입된 이메일인지, 아니라면 이메일 형식에 맞는지 -> 맞다면 인증 코드 전송
+
+    if (str === 'test@naver.com') {
+      setEmailCheckMsg('이미 가입된 이메일입니다.')
+    } else {
+      setEmailCheckMsg('')
+      emailCheckFunc()
+      if (emailCheckMsg === '') alert('이메일에서 인증 코드를 확인해주세요.')
+    }
+    setEmailCheck(str) // 어떤 경우에서든 emailCheck 값 변경
   }
 
   // 비밀번호와 비밀번호 확인이 일치하거나, 비밀번호 확인 칸이 비어있는 경우 true 반환
@@ -79,6 +97,7 @@ const Signup = () => {
         '비밀번호는 영문, 숫자를 포함하여 8자 이상이어야 합니다.',
       )
       setTextColor({ password: 'red' })
+      console.log('red')
     }
   }
 
@@ -102,6 +121,47 @@ const Signup = () => {
     }
   }
 
+  const signupCheckFunc = () => {
+    if (
+      form.email + '@' + form.emailSuffix === emailCheck && // 임시 저장 값 == 현재 이메일 칸에 들어있는 값 이어야함
+      form.email.length > 0 &&
+      emailCheckMsg === '' &&
+      form.password.length > 0 &&
+      passwordCheckMsg === '' &&
+      passwordRightMsg === '' &&
+      form.password === form.repassword &&
+      form.nickname.length > 0 &&
+      nicknameCheckMsg === ''
+    ) {
+      alert('회원가입이 완료되었습니다.')
+    } else alert('입력하신 정보를 다시 확인해주세요.')
+  }
+
+  useEffect(() => {
+    // selectBar에서 직접입력을 선택했을 때, selectBar 가리고 이메일 주소 직접 입력 창 띄움
+    $(function () {
+      $('#direct').hide()
+      $('#selectBar').on('change', function () {
+        if ($('#selectBar').val() === 'direct') {
+          $('#direct').show()
+          $('#selectBar').hide()
+        } else {
+          $('#direct').hide()
+        }
+      })
+    })
+  }, [])
+
+  const backToSelectBar = () => {
+    // 이메일 주소 직접 입력 창에서 x 버튼 눌렀을 때 수행
+    $(function () {
+      $('#direct').hide()
+      $('#selectBar').show()
+      $('#selectBar').val('selected')
+      $('#directBox').val('')
+    })
+  }
+
   useEffect(() => {
     // 이메일 값이 바뀔 때마다 이메일이 형식에 맞는지 확인
     emailCheckFunc()
@@ -121,7 +181,7 @@ const Signup = () => {
       setPasswordRightMsg('비밀번호가 일치하지 않습니다.')
       setTextColor({ repassword: 'red' })
     }
-  }, [form.repassword])
+  }, [form.password, form.repassword])
 
   useEffect(() => {
     // 닉네임 값이 바뀔 때마다 닉네임이 형식에 맞는지 확인
@@ -133,7 +193,7 @@ const Signup = () => {
       <Container>
         <Header
           onClick={() => {
-            window.alert('메인 페이지로 이동')
+            alert('메인 페이지로 이동')
           }}
         >
           <Image
@@ -207,11 +267,13 @@ const Signup = () => {
                 @
               </Text>
               <SelectBar
+                id="selectBar"
                 style={{ borderColor: textColor.email }}
                 name="emailSuffix"
                 onChange={handleChange}
+                defaultValue="selected"
               >
-                <option selected>선택해주세요</option>
+                <option value="selected">선택해주세요</option>
                 <option value="naver.com">naver.com</option>
                 <option value="hanmail.net">hanmail.net</option>
                 <option value="daum.net">daum.net</option>
@@ -222,12 +284,35 @@ const Signup = () => {
                 <option value="icloud.com">icloud.com</option>
                 <option value="direct">직접입력</option>
               </SelectBar>
+              <DirectBoxContainer id="direct">
+                <Input
+                  id="directBox"
+                  name="emailSuffix"
+                  placeholder="입력해주세요"
+                  onInput={handleChange}
+                  borderColor={textColor.email}
+                />
+                <button
+                  style={{
+                    backgroundColor: 'white',
+                    border: 'none',
+                    color: textColor.email,
+                  }}
+                  id="backToSelectBar"
+                  onClick={backToSelectBar}
+                >
+                  X
+                </button>
+              </DirectBoxContainer>
             </EmailInput>
             <Text color="red" margin="12px 0px">
               {emailCheckMsg}
             </Text>
             <Button
               bgColor={emailButtonColor}
+              onClick={() => {
+                testEmailCertification(form.email + '@' + form.emailSuffix)
+              }}
               onMouseOver={() => {
                 setEmailButtonColor('#e6f4ff')
               }}
@@ -308,6 +393,7 @@ const Signup = () => {
           >
             <Button
               bgColor={signupButtonColor}
+              onClick={signupCheckFunc}
               onMouseOver={() => {
                 setSignupButtonColor('#74a9d4')
               }}
@@ -328,7 +414,7 @@ const Signup = () => {
                 margin="0px 8px"
                 underline
                 onClick={() => {
-                  window.alert('로그인 페이지로 이동')
+                  alert('로그인 페이지로 이동')
                 }}
               >
                 로그인
@@ -409,6 +495,10 @@ const SelectBar = styled.select`
   width: 100%;
   font-size: 15px;
   font-weight: 500;
+`
+const DirectBoxContainer = styled.div`
+  display: flex;
+  width: 100%;
 `
 const PasswordContainer = styled.div`
   display: flex;
