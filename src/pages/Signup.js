@@ -1,271 +1,241 @@
-import React, { Fragment, useState, useEffect } from 'react'
-import { Text, Input, Button, Image } from '../elements'
-import styled from 'styled-components'
-import $ from 'jquery'
+import React, { Fragment, useState, useEffect } from "react";
+import styled from "styled-components";
+import $ from "jquery";
 
 const Signup = () => {
-  // 버튼 위에 마우스가 올려져 있을 때 색 변경을 관리하는 state
-  const [emailButtonColor, setEmailButtonColor] = useState('white')
-  const [signupButtonColor, setSignupButtonColor] = useState('#35c4ef')
-
   // 회원가입에 필요한 기본적인 계정 정보 관리하는 state
   const [form, setForm] = useState({
-    email: '',
-    emailSuffix: '',
-    password: '',
-    repassword: '',
-    nickname: '',
-  })
+    email: "",
+    emailSuffix: "",
+    password: "",
+    repassword: "",
+    nickname: "",
+  });
 
   // 형식에 맞지 않을 때 글씨를 빨간색으로 바꿔줄 state
   const [textColor, setTextColor] = useState({
-    email: 'black',
-    password: 'black',
-    repassword: 'black',
-    nickname: 'black',
-  })
+    email: "black",
+    password: "black",
+    repassword: "black",
+    nickname: "black",
+  });
 
   // 형식에 맞는지 여부를 알려주는 text를 관리하는 state
-  const [emailCheckMsg, setEmailCheckMsg] = useState('')
-  const [passwordCheckMsg, setPasswordCheckMsg] = useState('')
-  const [passwordRightMsg, setPasswordRightMsg] = useState('')
-  const [nicknameCheckMsg, setNicknameCheckMsg] = useState('')
+  const [emailCheckMsg, setEmailCheckMsg] = useState("");
+  const [passwordCheckMsg, setPasswordCheckMsg] = useState("");
+  const [passwordRightMsg, setPasswordRightMsg] = useState("");
+  const [nicknameCheckMsg, setNicknameCheckMsg] = useState("");
 
-  const [emailCheck, setEmailCheck] = useState('') // 이메일 중복 확인 완료 상태 임시 저장
+  const [emailCheck, setEmailCheck] = useState(""); // 이메일 중복 확인 완료 상태 임시 저장
 
   // form값을 불러오고 바뀐 값만 form에 새로 대체해줌
   const handleChange = (e) => {
     const changed = {
       ...form,
       [e.target.name]: e.target.value,
-    }
-    console.log(changed)
-    setForm(changed)
-  }
+    };
+    console.log(changed);
+    setForm(changed);
+  };
 
   // 이메일 형식 체크 정규식
   const emailRegExp = (str) => {
-    str = str + '@' + form.emailSuffix
-    var regExp = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i
-    return regExp.test(str) ? true : false
-  }
+    str = str + "@" + form.emailSuffix;
+    var regExp =
+      /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
+    return regExp.test(str) ? true : false;
+  };
 
   // 이메일 형식 체크 함수
   const emailCheckFunc = () => {
     if (emailRegExp(form.email) || form.email.length === 0) {
-      setEmailCheckMsg('')
-      setTextColor({ email: 'black' })
+      setEmailCheckMsg("");
+      setTextColor({ email: "black" });
     } else {
-      setEmailCheckMsg('이메일 형식이 올바르지 않습니다.')
-      setTextColor({ email: 'red' })
+      setEmailCheckMsg("이메일 형식이 올바르지 않습니다.");
+      setTextColor({ email: "red" });
     }
-    setEmailCheck('') // emailCheckFunc이 실행될 때마다(email 값이 바뀔 때마다) ''로 초기화
-  }
+    setEmailCheck(""); // emailCheckFunc이 실행될 때마다(email 값이 바뀔 때마다) ''로 초기화
+  };
 
   const testEmailCertification = (str) => {
     // 이메일 인증하기 버튼 눌렀을 때 인증 실패하면 메시지 띄우면 됨(이메일 형식 예외 케이스 굳이 안 짜도 됨)
     // 이메일이 가입된 이메일인지, 아니라면 이메일 형식에 맞는지 -> 맞다면 인증 코드 전송
 
-    if (str === 'test@naver.com') {
-      setEmailCheckMsg('이미 가입된 이메일입니다.')
+    if (str === "test@naver.com") {
+      setEmailCheckMsg("이미 가입된 이메일입니다.");
     } else {
-      setEmailCheckMsg('')
-      emailCheckFunc()
-      if (emailCheckMsg === '') alert('이메일에서 인증 코드를 확인해주세요.')
+      setEmailCheckMsg("");
+      emailCheckFunc();
+      if (emailCheckMsg === "") alert("이메일에서 인증 코드를 확인해주세요.");
     }
-    setEmailCheck(str) // 어떤 경우에서든 emailCheck 값 변경
-  }
+    setEmailCheck(str); // 어떤 경우에서든 emailCheck 값 변경
+  };
 
   // 비밀번호와 비밀번호 확인이 일치하거나, 비밀번호 확인 칸이 비어있는 경우 true 반환
   const pEqualR = () => {
-    return form.password === form.repassword || form.repassword.length === 0
-  }
+    return form.password === form.repassword || form.repassword.length === 0;
+  };
 
   // 영문, 숫자를 포함한 8자 이상의 비밀번호 형식 체크 정규식 (정의된 특수문자도 사용 가능)
   const passwordRegExp = (str) => {
-    var regExp = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d~!@#$%^&*()-_+|=]{8,}$/
-    return regExp.test(str) ? true : false
-  }
+    var regExp = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d~!@#$%^&*()-_+|=]{8,}$/;
+    return regExp.test(str) ? true : false;
+  };
 
   // 비밀번호 형식 체크 함수
   const passwordCheckFunc = () => {
     if (passwordRegExp(form.password) || form.password.length === 0) {
-      setPasswordCheckMsg('')
-      setTextColor({ password: 'black' })
+      setPasswordCheckMsg("");
+      setTextColor({ password: "black" });
     } else {
       setPasswordCheckMsg(
-        '비밀번호는 영문, 숫자를 포함하여 8자 이상이어야 합니다.',
-      )
-      setTextColor({ password: 'red' })
-      console.log('red')
+        "비밀번호는 영문, 숫자를 포함하여 8자 이상이어야 합니다."
+      );
+      setTextColor({ password: "red" });
+      console.log("red");
     }
-  }
+  };
 
   // 2자 이상 15자 이하의 영문, 숫자, 한글로 이루어진 닉네임 형식 체크 정규식
   const nicknameRegExp = (str) => {
-    var regExp = /^([a-zA-Z0-9ㄱ-ㅎ|ㅏ-ㅣ|가-힣]).{1,14}$/
-    return regExp.test(str) ? true : false
-  }
+    var regExp = /^([a-zA-Z0-9ㄱ-ㅎ|ㅏ-ㅣ|가-힣]).{1,14}$/;
+    return regExp.test(str) ? true : false;
+  };
 
   // 닉네임 형식 체크 함수
   const nicknameCheckFunc = () => {
     if (nicknameRegExp(form.nickname) || form.nickname.length === 0) {
-      setNicknameCheckMsg('')
-      setTextColor({ nickname: 'black' })
+      setNicknameCheckMsg("");
+      setTextColor({ nickname: "black" });
     } else if (form.nickname.length < 2) {
-      setNicknameCheckMsg('2자 이상 입력해주세요.')
-      setTextColor({ nickname: 'red' })
+      setNicknameCheckMsg("2자 이상 입력해주세요.");
+      setTextColor({ nickname: "red" });
     } else if (form.nickname.length > 15) {
-      setNicknameCheckMsg('15자 이하로 입력해주세요.')
-      setTextColor({ nickname: 'red' })
+      setNicknameCheckMsg("15자 이하로 입력해주세요.");
+      setTextColor({ nickname: "red" });
     }
-  }
+  };
 
   const signupCheckFunc = () => {
     if (
-      form.email + '@' + form.emailSuffix === emailCheck && // 임시 저장 값 == 현재 이메일 칸에 들어있는 값 이어야함
+      form.email + "@" + form.emailSuffix === emailCheck && // 임시 저장 값 == 현재 이메일 칸에 들어있는 값 이어야함
       form.email.length > 0 &&
-      emailCheckMsg === '' &&
+      emailCheckMsg === "" &&
       form.password.length > 0 &&
-      passwordCheckMsg === '' &&
-      passwordRightMsg === '' &&
+      passwordCheckMsg === "" &&
+      passwordRightMsg === "" &&
       form.password === form.repassword &&
       form.nickname.length > 0 &&
-      nicknameCheckMsg === ''
+      nicknameCheckMsg === ""
     ) {
-      alert('회원가입이 완료되었습니다.')
-    } else alert('입력하신 정보를 다시 확인해주세요.')
-  }
+      alert("회원가입이 완료되었습니다.");
+    } else alert("입력하신 정보를 다시 확인해주세요.");
+  };
 
   useEffect(() => {
     // selectBar에서 직접입력을 선택했을 때, selectBar 가리고 이메일 주소 직접 입력 창 띄움
     $(function () {
-      $('#direct').hide()
-      $('#selectBar').on('change', function () {
-        if ($('#selectBar').val() === 'direct') {
-          $('#direct').show()
-          $('#selectBar').hide()
+      $("#direct").hide();
+      $("#selectBar").on("change", function () {
+        if ($("#selectBar").val() === "direct") {
+          $("#direct").show();
+          $("#selectBar").hide();
         } else {
-          $('#direct').hide()
+          $("#direct").hide();
         }
-      })
-    })
-  }, [])
+      });
+    });
+  }, []);
 
   const backToSelectBar = () => {
     // 이메일 주소 직접 입력 창에서 x 버튼 눌렀을 때 수행
     $(function () {
-      $('#direct').hide()
-      $('#selectBar').show()
-      $('#selectBar').val('selected')
-      $('#directBox').val('')
-    })
-  }
+      $("#direct").hide();
+      $("#selectBar").show();
+      $("#selectBar").val("selected");
+      $("#directBox").val("");
+    });
+  };
 
   useEffect(() => {
     // 이메일 값이 바뀔 때마다 이메일이 형식에 맞는지 확인
-    emailCheckFunc()
-  }, [form.email, form.emailSuffix])
+    emailCheckFunc();
+  }, [form.email, form.emailSuffix]);
 
   useEffect(() => {
     // 비밀번호 값이 바뀔 때마다 비밀번호가 형식에 맞는지 확인
-    passwordCheckFunc()
-  }, [form.password])
+    passwordCheckFunc();
+  }, [form.password]);
 
   useEffect(() => {
     // 비밀번호 확인 칸의 값이 바뀔 때마다 비밀번호가 일치하는지 확인
     if (pEqualR()) {
-      setPasswordRightMsg('')
-      setTextColor({ repassword: 'black' })
+      setPasswordRightMsg("");
+      setTextColor({ repassword: "black" });
     } else {
-      setPasswordRightMsg('비밀번호가 일치하지 않습니다.')
-      setTextColor({ repassword: 'red' })
+      setPasswordRightMsg("비밀번호가 일치하지 않습니다.");
+      setTextColor({ repassword: "red" });
     }
-  }, [form.password, form.repassword])
+  }, [form.password, form.repassword]);
 
   useEffect(() => {
     // 닉네임 값이 바뀔 때마다 닉네임이 형식에 맞는지 확인
-    nicknameCheckFunc()
-  }, [form.nickname])
+    nicknameCheckFunc();
+  }, [form.nickname]);
 
   return (
     <Fragment>
       <Container>
         <Header
           onClick={() => {
-            alert('메인 페이지로 이동')
+            alert("메인 페이지로 이동");
           }}
         >
-          <Image
-            width="50px"
-            height="50px"
-            src="https://image.rocketpunch.com/company/2425/bucketplace_logo_1520495612.png?s=400x400&t=inside"
-            borderRadius="10px"
-          />
-          <Text weight="bold" size="24px" margin="0px 8px">
-            오늘의집
-          </Text>
+          <LogoImage src="https://image.rocketpunch.com/company/2425/bucketplace_logo_1520495612.png?s=400x400&t=inside"/>
+          <Ohouse>오늘의집</Ohouse>
         </Header>
         <SignupContainer>
-          <Text weight="bold" size="20px" margin="8px 0px">
-            회원가입
-          </Text>
+          <SignupText>회원가입</SignupText>
           <SocialLogin>
-            <Text size="12px" margin="8px 0px">
-              SNS계정으로 간편하게 회원가입
-            </Text>
+            <SNSText>SNS계정으로 간편하게 회원가입</SNSText>
             <SocialLoginContainer>
               <SocialLoginImage>
                 <a href="https://www.facebook.com">
-                  <Image
-                    width="55px"
-                    height="55px"
-                    borderRadius="55px"
-                    src="https://blog.kakaocdn.net/dn/lhU48/btqRoQfJhbZ/9E6G4WxknrC7MPv2gV1DSk/img.jpg"
-                  />
+                  <SNSImage src="https://blog.kakaocdn.net/dn/lhU48/btqRoQfJhbZ/9E6G4WxknrC7MPv2gV1DSk/img.jpg"/>
                 </a>
               </SocialLoginImage>
               <SocialLoginImage>
                 <a href="https://www.kakao.com">
-                  <Image
-                    width="55px"
-                    height="55px"
-                    borderRadius="55px"
-                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/KakaoTalk_logo.svg/2500px-KakaoTalk_logo.svg.png"
-                  />
+                <SNSImage src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/KakaoTalk_logo.svg/2500px-KakaoTalk_logo.svg.png"/>
                 </a>
               </SocialLoginImage>
               <SocialLoginImage>
                 <a href="https://www.naver.com">
-                  <Image
-                    width="55px"
-                    height="55px"
-                    borderRadius="55px"
-                    src="https://play-lh.googleusercontent.com/jYtnK__ibJh9emODIgTyjZdbKym1iAj4RfoVhQZcfbG-DuTSHR5moHVx9CQnqg1yoco9"
-                  />
+                <SNSImage src="https://play-lh.googleusercontent.com/jYtnK__ibJh9emODIgTyjZdbKym1iAj4RfoVhQZcfbG-DuTSHR5moHVx9CQnqg1yoco9"/>
                 </a>
               </SocialLoginImage>
             </SocialLoginContainer>
           </SocialLogin>
           <EmailContainer>
-            <Text
-              weight="bold"
-              size="18px"
-              margin="8px 0px"
-              color={textColor.email}
-            >
-              이메일
-            </Text>
+            <Label style={{ color: textColor.email }}>이메일</Label>
             <EmailInput>
               <Input
                 name="email"
                 placeholder="이메일"
                 onInput={handleChange}
-                borderColor={textColor.email}
+                style={{ borderColor: textColor.email }}
               />
-              <Text weight="bold" margin="0px 2px" size="20px" color="#cccccc">
+              <p
+                style={{
+                  fontWeight: "bold",
+                  margin: "0px 2px",
+                  fontSize: "20px",
+                  color: "#cccccc",
+                }}
+              >
                 @
-              </Text>
+              </p>
               <SelectBar
                 id="selectBar"
                 style={{ borderColor: textColor.email }}
@@ -290,12 +260,12 @@ const Signup = () => {
                   name="emailSuffix"
                   placeholder="입력해주세요"
                   onInput={handleChange}
-                  borderColor={textColor.email}
+                  style={{ borderColor: textColor.email }}
                 />
                 <button
                   style={{
-                    backgroundColor: 'white',
-                    border: 'none',
+                    backgroundColor: "white",
+                    border: "none",
                     color: textColor.email,
                   }}
                   id="backToSelectBar"
@@ -305,127 +275,104 @@ const Signup = () => {
                 </button>
               </DirectBoxContainer>
             </EmailInput>
-            <Text color="red" margin="12px 0px">
-              {emailCheckMsg}
-            </Text>
-            <Button
-              bgColor={emailButtonColor}
+            <ErrorText>{emailCheckMsg}</ErrorText>
+            <EmailButton
               onClick={() => {
-                testEmailCertification(form.email + '@' + form.emailSuffix)
-              }}
-              onMouseOver={() => {
-                setEmailButtonColor('#e6f4ff')
-              }}
-              onMouseLeave={() => {
-                setEmailButtonColor('white')
+                testEmailCertification(form.email + "@" + form.emailSuffix);
               }}
             >
-              <Text weight="bold" size="20px" color="#35c4ef" margin="14px">
-                이메일 인증하기
-              </Text>
-            </Button>
+              <ButtonText>이메일 인증하기</ButtonText>
+            </EmailButton>
           </EmailContainer>
           <PasswordContainer>
-            <Text weight="bold" size="18px" color={textColor.password}>
-              비밀번호
-            </Text>
+            <Label style={{ color: textColor.password }}>비밀번호</Label>
             <Password>
-              <Text margin="8px 0px">
+              <Description>
                 영문, 숫자를 포함한 8자 이상의 비밀번호를 입력해주세요.
-              </Text>
+              </Description>
               <Input
                 type="password"
                 name="password"
                 placeholder="비밀번호"
                 onInput={handleChange}
-                borderColor={textColor.password}
+                style={{ borderColor: textColor.password }}
               />
             </Password>
-            <Text color="red" margin="12px 0px">
-              {passwordCheckMsg}
-            </Text>
+            <ErrorText>{passwordCheckMsg}</ErrorText>
           </PasswordContainer>
           <PasswordCheckContainer>
-            <Text weight="bold" size="18px" color={textColor.repassword}>
-              비밀번호 확인
-            </Text>
+            <Label style={{ color: textColor.repassword }}>비밀번호 확인</Label>
             <PasswordCheck>
               <Input
                 type="password"
                 name="repassword"
                 placeholder="비밀번호 확인"
                 onInput={handleChange}
-                borderColor={textColor.repassword}
+                style={{ borderColor: textColor.repassword }}
               />
             </PasswordCheck>
-            <Text color="red" margin="12px 0px">
-              {passwordRightMsg}
-            </Text>
+            <ErrorText>{passwordRightMsg}</ErrorText>
           </PasswordCheckContainer>
           <NicknameContainer>
-            <Text weight="bold" size="18px" color={textColor.nickname}>
-              닉네임
-            </Text>
+            <Label style={{ color: textColor.nickname }}>닉네임</Label>
             <Nickname>
-              <Text margin="8px 0px">
+              <Description>
                 다른 유저와 겹치지 않는 별명을 입력해주세요. (2~15자)
-              </Text>
+              </Description>
               <Input
                 name="nickname"
                 placeholder="별명 (2~15자)"
                 onInput={handleChange}
-                borderColor={textColor.nickname}
+                style={{ borderColor: textColor.nickname }}
               />
             </Nickname>
-            <Text color="red" margin="12px 0px">
-              {nicknameCheckMsg}
-            </Text>
+            <ErrorText>{nicknameCheckMsg}</ErrorText>
           </NicknameContainer>
           <div
             style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100%',
-              marginTop: '8px',
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              marginTop: "8px",
             }}
           >
-            <Button
-              bgColor={signupButtonColor}
-              onClick={signupCheckFunc}
-              onMouseOver={() => {
-                setSignupButtonColor('#74a9d4')
-              }}
-              onMouseLeave={() => {
-                setSignupButtonColor('#35c4ef')
-              }}
-            >
-              <Text weight="bold" size="20px" color="white" margin="14px">
-                회원가입하기
-              </Text>
-            </Button>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <Text weight="400" margin="20px 0px">
+            <SignupButton onClick={signupCheckFunc}>
+              <ButtonText style={{color:'white'}}>회원가입하기</ButtonText>
+            </SignupButton>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <p
+                style={{
+                  color: "#333333",
+                  fontSize: "14px",
+                  fontWeight: "400",
+                  margin: "20px 0px",
+                }}
+              >
                 이미 아이디가 있으신가요?
-              </Text>
-              <Text
-                weight="bold"
-                margin="0px 8px"
-                underline
+              </p>
+              <p
+                style={{
+                  color: "#333333",
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  margin: "0px 8px",
+                  textDecoration: "underline",
+                }}
                 onClick={() => {
-                  alert('로그인 페이지로 이동')
+                  alert("로그인 페이지로 이동");
                 }}
               >
                 로그인
-              </Text>
+              </p>
             </div>
           </div>
         </SignupContainer>
       </Container>
     </Fragment>
-  )
-}
+  );
+};
 
 const Container = styled.div`
   display: flex;
@@ -434,14 +381,14 @@ const Container = styled.div`
   justify-content: flex-start;
   width: 100%;
   height: 120vh;
-`
+`;
 const Header = styled.div`
   display: flex;
   align-items: center;
   width: 100%;
   padding-left: 40px;
   margin-top: 32px;
-`
+`;
 const SignupContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -450,7 +397,7 @@ const SignupContainer = styled.div`
   width: 30%;
   height: 100%;
   padding: 4px;
-`
+`;
 const SocialLogin = styled.div`
   display: flex;
   flex-direction: column;
@@ -460,20 +407,20 @@ const SocialLogin = styled.div`
   padding-bottom: 24px;
   box-sizing: border-box;
   border-bottom: 1px solid #dddddd;
-`
+`;
 const SocialLoginContainer = styled.div`
   display: flex;
   align-items: flex-start;
   justify-content: center;
   width: 100%;
-`
+`;
 const SocialLoginImage = styled.div`
   display: flex;
   align-items: flex-start;
   justify-content: center;
   width: 55px;
   margin: 0px 16px;
-`
+`;
 const EmailContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -481,12 +428,12 @@ const EmailContainer = styled.div`
   justify-content: flex-start;
   width: 100%;
   padding: 12px 0px;
-`
+`;
 const EmailInput = styled.div`
   display: flex;
   align-items: center;
   width: 100%;
-`
+`;
 const SelectBar = styled.select`
   padding: 14px;
   border: 1px solid #cccccc;
@@ -495,11 +442,11 @@ const SelectBar = styled.select`
   width: 100%;
   font-size: 15px;
   font-weight: 500;
-`
+`;
 const DirectBoxContainer = styled.div`
   display: flex;
   width: 100%;
-`
+`;
 const PasswordContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -507,21 +454,21 @@ const PasswordContainer = styled.div`
   justify-content: flex-start;
   width: 100%;
   padding: 12px 0px;
-`
+`;
 const PasswordCheckContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
   width: 100%;
-`
+`;
 const Password = styled.div`
   width: 100%;
-`
+`;
 const PasswordCheck = styled.div`
   width: 100%;
   margin: 8px 0px;
-`
+`;
 const NicknameContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -529,9 +476,85 @@ const NicknameContainer = styled.div`
   justify-content: flex-start;
   width: 100%;
   padding: 12px 0px;
-`
-
+`;
 const Nickname = styled.div`
   width: 100%;
+`;
+const Ohouse = styled.p`
+  color: #333333;
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0px 8px;
+`;
+const SignupText = styled.p`
+  color: #333333;
+  font-size: 20px;
+  font-weight: bold;
+  margin: 8px 0px;
+`;
+const SNSText = styled.p`
+  color: #333333;
+  font-size: 12px;
+  margin: 8px 0px;
+`;
+const Label = styled.p`
+  font-size: 18px;
+  font-weight: bold;
+  margin: 8px 0px;
+`;
+const ErrorText = styled.p`
+  color: red;
+  font-size: 14px;
+  margin: 12px 0px;
+`;
+const ButtonText = styled.p`
+  color: #35c4ef;
+  font-size: 20px;
+  font-weight: bold;
+  margin: 14px;
+`;
+const Description = styled.p`
+  color: #333333;
+  font-size: 14px;
+  margin: 8px 0px;
+`;
+const Input = styled.input`
+  font-size: 15px;
+  font-weight: 500;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #cccccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+`;
+const EmailButton = styled.button`
+  width: 100%;
+  background-color: white;
+  box-sizing: border-box;
+  border: 2px solid #35c4ef;
+  border-radius: 8px;
+  &:hover {
+    background-color: #e6f4ff;
+  }
+`;
+const SignupButton = styled.button`
+  width: 100%;
+  background-color: #35c4ef;
+  box-sizing: border-box;
+  border: 2px solid #35c4ef;
+  border-radius: 8px;
+  &:hover {
+    background-color: #74a9d4;
+  }
+`;
+const LogoImage=styled.img`
+width:50px;
+height:50px;
+border-radius:10px;
 `
-export default Signup
+const SNSImage=styled.img`
+width:55px;
+height:55px;
+border-radius:55px;
+`
+export default Signup;
